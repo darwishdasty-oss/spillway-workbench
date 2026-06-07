@@ -9,15 +9,72 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
+          cache: 'pip'
+
+      - name: Show working directory and file structure
+        shell: pwsh
+        run: |
+          Write-Host "=== Current directory ==="
+          Get-Location
+          Write-Host "=== Files in repo (top level) ==="
+          Get-ChildItem -Force | Select-Object Name, Mode | Format-Table -AutoSize
+          Write-Host "=== ui/ contents ==="
+          if (Test-Path "ui") { Get-ChildItem "ui" -Recurse -Depth 2 | Select-Object FullName | Format-Table -AutoSize }
+          Write-Host "=== Looking for swb.spec ==="
+          if (Test-Path "swb.spec") { Write-Host "FOUND swb.spec" } else { Write-Host "ERROR: swb.spec NOT FOUND" -ForegroundColor Red; exit 1 }
+          if (Test-Path "ui/mdi_main.py") { Write-Host "FOUND ui/mdi_main.py" } else { Write-Host "ERROR: ui/mdi_main.py NOT FOUND" -ForegroundColor Red; exit 1 }
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
           python -m pip install --upgrade pip
-          pip install PySide6 numpy matplotlib pyinstaller
-      - run: pyinstaller swb.spec
-      - uses: actions/upload-artifact@v4
+          pip install PySide6==6.7.* numpy==1.26.* matplotlib==3.8.* pyinstaller==6.10.*
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: pip install failed" -ForegroundColor Red
+            exit 1
+          }
+
+      - name: Clean previous build
+        shell: pwsh
+        run: |
+          if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
+          if (Test-Path "dist")  { Remove-Item -Recurse -Force "dist" }
+          Write-Host "Cleaned build/ and dist/"
+
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean swb.spec 2>&1 | Tee-Object -FilePath "build.log"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host ""
+            Write-Host "=== PyInstaller failed. Last 50 lines of build.log: ===" -ForegroundColor Red
+            Get-Content "build.log" | Select-Object -Last 50
+            exit 1
+          }
+
+      - name: Verify .exe was created
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/SpillwayWorkbench.exe")) {
+            Write-Host "ERROR: dist/SpillwayWorkbench.exe not found after build" -ForegroundColor Red
+            Write-Host "=== dist/ contents: ==="
+            if (Test-Path "dist") { Get-ChildItem "dist" -Recurse | Select-Object FullName | Format-Table -AutoSize }
+            exit 1
+          }
+          $size = (Get-Item "dist/SpillwayWorkbench.exe").Length
+          Write-Host "SUCCESS: dist/SpillwayWorkbench.exe created, size = $size bytes ($([math]::Round($size/1MB, 1)) MB)"
+
+      - name: Upload .exe artifact
+        uses: actions/upload-artifact@v4
         with:
           name: SpillwayWorkbench-Windows-x64
           path: dist/SpillwayWorkbench.exe
+          if-no-files-found: error
+
