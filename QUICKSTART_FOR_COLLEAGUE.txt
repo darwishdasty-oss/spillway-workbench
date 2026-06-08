@@ -1,0 +1,62 @@
+============================================================
+  SPILLWAY WORKBENCH - QUICK BUILD INSTRUCTIONS
+  (For the person running the build on Windows)
+============================================================
+
+Hi! Thanks for helping build a .exe for this hydraulic
+engineering tool. The whole process takes about 10 minutes
+and is fully automated. Here's what to do:
+
+STEP 1: INSTALL PYTHON (5 min, one-time)
+-----------------------------------------
+1. Go to https://www.python.org/downloads/windows/
+2. Click "Download Python 3.11.x"
+3. Run the installer
+4. ON THE FIRST SCREEN: Check the box at the bottom that
+   says "Add Python to PATH" — THIS IS CRITICAL
+5. Click "Install Now"
+6. Click "Close" when done
+
+If you already have Python installed, skip to Step 2.
+
+STEP 2: EXTRACT THE SOURCE
+---------------------------
+1. Right-click SWB_v1_source.zip
+2. Click "Extract All..."
+3. Click "Extract"
+4. A new folder opens with files like:
+   - build_windows.bat  (this is what you'll double-click)
+   - swb.spec
+   - cavicuspill\
+   - em_py\
+   - ui\
+
+STEP 3: BUILD THE .EXE
+------------------------
+1. In the extracted folder, double-click "build_windows.bat"
+2. A black command window will open with progress messages
+3. Wait 5-10 minutes. The script will:
+   - Check for Python
+   - Install required packages
+   - Build the .exe
+   - Tell you where to find it
+
+STEP 4: SEND THE .EXE BACK
+---------------------------
+1. When the script says "SUCCESS!", look in the "dist" folder
+2. Inside is "SpillwayWorkbench.exe" (~110 MB)
+3. Send this file back to the person who asked you to build it
+   (email, Google Drive, USB stick, etc.)
+
+THAT'S IT!
+
+If something goes wrong, the script will tell you what to do.
+Most issues are fixed by:
+- Running as Administrator (right-click build_windows.bat,
+  select "Run as administrator")
+- Temporarily disabling antivirus
+- Making sure "Add Python to PATH" was checked during install
+
+Thanks for helping!
+
+============================================================
