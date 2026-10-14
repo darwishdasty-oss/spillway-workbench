@@ -173,6 +173,134 @@ def energy_head(z: float, y: float, V: float) -> float:
 # Standard step with two-branch bisection solver
 # =============================================================================
 
+def _section_critical_depth(Q: float, section1: Callable,
+                            y_floor: float = 1e-9,
+                            y_ceiling: float = 50.0,
+                            g: float = G) -> float:
+    """True critical depth of a callable section1(y) -> (A, P).
+
+    The critical depth minimizes the specific-energy curve
+        E(y) = y + (Q / A(y))**2 / (2 g),
+    which is strictly convex between the first wetted depth and the region
+    where E grows linearly again.  Golden-section minimization of E works
+    for ANY section type (rectangular, circular, compound) and needs no
+    explicit top width.  (v1.0.1, F-G2-1: replaces the heuristic
+    max(0.5, 1.5*y0) branch split.)
+    """
+    def E(y: float) -> float:
+        A, _P = section1(y)
+        if A <= 0:
+            return float("inf")
+        return y + (Q / A) ** 2 / (2.0 * g)
+
+    lo = y_floor
+    if E(lo) == float("inf"):
+        for _ in range(60):          # advance to the first wetted depth
+            lo *= 2.0
+            if E(lo) < float("inf"):
+                break
+    hi = max(2.0 * lo, 1e-6)
+    while hi < y_ceiling and E(2.0 * hi) < E(hi):
+        hi *= 2.0
+    hi = min(2.0 * hi, y_ceiling)
+    gr = (math.sqrt(5.0) - 1.0) / 2.0
+    c = hi - gr * (hi - lo)
+    d = lo + gr * (hi - lo)
+    fc, fd = E(c), E(d)
+    for _ in range(200):
+        if fc < fd:
+            hi, d, fd = d, c, fc
+            c = hi - gr * (hi - lo)
+            fc = E(c)
+        else:
+            lo, c, fc = c, d, fd
+            d = lo + gr * (hi - lo)
+            fd = E(d)
+        if (hi - lo) < 1e-15 * max(1.0, hi):
+            break
+    return 0.5 * (lo + hi)
+
+
+def _newton_polish(f: Callable, y: float, max_iter: int = 30) -> float:
+    """Polish a root of f to machine precision (damped Newton, central
+    difference derivative).  Returns the input value if the derivative
+    degenerates.  (v1.0.1, F-G2-1: the 1e-12 analytic gate is unreachable
+    with bisection alone -- v1.0.0 stopped at |f| < 1e-5.)"""
+    for _ in range(max_iter):
+        f0 = f(y)
+        h = max(1e-12, abs(y) * 1e-9)
+        fp = f(y + h)
+        fm = f(y - h)
+        d = (fp - fm) / (2.0 * h)
+        if d == 0 or not math.isfinite(d):
+            break
+        y_new = y - f0 / d
+        if not math.isfinite(y_new) or y_new <= 0:
+            break
+        y = y_new
+        if abs(f(y)) <= 1e-13:
+            break
+    return y
+
+
+def _find_branch_root(f: Callable, lo: float, hi: float) -> Optional[float]:
+    """Root of f on [lo, hi], robust to an EVEN number of crossings.
+
+    The v1.0.0 failure mode: both energy roots (super + sub) straddled the
+    true critical depth inside ONE heuristic bracket, the endpoint signs
+    matched, bisection bailed out with None, and the caller silently froze
+    the profile at the upstream depth.  Here: coarse scan for a sign
+    change, safeguarded bisection, Newton polish.  Returns None only when
+    f genuinely has no sign change on the bracket.
+    """
+    try:
+        f_lo = f(lo)
+        f_hi = f(hi)
+    except Exception:
+        return None
+    if not (math.isfinite(f_lo) and math.isfinite(f_hi)):
+        return None
+    if f_lo == 0.0:
+        return lo
+    if f_hi == 0.0:
+        return hi
+    a, b, fa = lo, hi, f_lo
+    if (f_lo > 0) == (f_hi > 0):
+        found = False
+        n_scan = 64
+        prev_x, prev_f = lo, f_lo
+        for i in range(1, n_scan + 1):
+            x = lo + (hi - lo) * i / n_scan
+            try:
+                fx = f(x)
+            except Exception:
+                continue
+            if not math.isfinite(fx):
+                continue
+            if (prev_f > 0) != (fx > 0):
+                a, b, fa = prev_x, x, prev_f
+                found = True
+                break
+            prev_x, prev_f = x, fx
+        if not found:
+            return None
+    for _ in range(200):
+        mid = 0.5 * (a + b)
+        try:
+            f_mid = f(mid)
+        except Exception:
+            break
+        if not math.isfinite(f_mid):
+            break
+        if (f_mid > 0) == (fa > 0):
+            a, fa = mid, f_mid
+        else:
+            b = mid
+        if (b - a) < 1e-13 * max(1.0, abs(b)):
+            break
+    return _newton_polish(f, 0.5 * (a + b))
+
+
 def standard_step_general(
     Q: float,
     z0: float, y0: float, A0: float, P0: float,
@@ -184,10 +312,18 @@ def standard_step_general(
     supercritical: bool = True,
 ) -> float:
     """Standard step with a callable section1(y) -> (A, P).
-    
+
     Solves: H(z1, y1) = H(z0, y0) + h_f
-    by finding BOTH the subcritical and supercritical roots using bisection,
-    then picking the one that matches the flow regime.
+    by finding BOTH the subcritical and supercritical roots of the energy
+    equation, then picking the one that matches the flow regime.
+
+    v1.0.1 (F-G2-1): the branch split is the TRUE critical depth of the
+    section (golden-section minimum of the specific-energy curve), the
+    root finder tolerates root pairs straddling the critical depth inside
+    one bracket, and every accepted root is Newton-polished to machine
+    precision.  There is NO silent fallback to the upstream depth: if the
+    requested regime has no root, the solvable continuation of the other
+    regime is returned; if neither regime has a root, ValueError is raised.
     """
     if dx <= 0 or Q <= 0 or A0 <= 0:
         return y0
@@ -205,48 +341,41 @@ def standard_step_general(
         hf = 0.5 * (Sf1 + Sf0) * dx
         return H1 - H0 + hf
 
-    # Approximate critical depth
-    y_c = max(0.5, y0 * 1.5, 0.5)
+    y_c = _section_critical_depth(Q, section1, g=g)
+    y_floor = max(1e-9, 1e-6)
+    y_ceil = max(2.0 * y_c, 2.0 * y0, 10.0)
 
-    def bisect(lo, hi, max_iter=80):
-        for _ in range(max_iter):
-            try:
-                f_lo = f(lo)
-                f_hi = f(hi)
-            except Exception:
-                return None
-            if abs(f_lo) < 1e-5: return lo
-            if abs(f_hi) < 1e-5: return hi
-            if (f_lo > 0) == (f_hi > 0):
-                return None
-            mid = (lo + hi) / 2
-            f_mid = f(mid)
-            if abs(f_mid) < 1e-5:
-                return mid
-            if (f_mid > 0) == (f_lo > 0):
-                lo = mid
-            else:
-                hi = mid
-            if (hi - lo) < 1e-7:
-                return (hi + lo) / 2
-        return (lo + hi) / 2
-
-    # Bracket both roots
-    y_super = bisect(0.001, y_c)
-    if y_super is None:
-        y_super = y0
-    y_sub = bisect(y_c, max(y_c * 6, y0 * 8, 10.0))
-    if y_sub is None:
-        y_sub = y0
+    y_super = _find_branch_root(f, y_floor, y_c)
+    y_sub = _find_branch_root(f, y_c, y_ceil)
 
     if supercritical:
-        return max(0.01, y_super)
+        if y_super is not None:
+            return max(0.01, y_super)
+        if y_sub is not None:
+            return max(0.01, y_sub)
+        raise ValueError(
+            "standard_step_general: no energy-elevation root in either "
+            f"regime (y_c = {y_c:.4f} m); check the reach invert change "
+            "and the inflow state")
     else:
-        return max(0.01, y_sub) if y_sub > y_c else max(0.01, y_super)
+        if y_sub is not None:
+            return max(0.01, y_sub)
+        if y_super is not None:
+            return max(0.01, y_super)
+        raise ValueError(
+            "standard_step_general: no energy-elevation root in either "
+            f"regime (y_c = {y_c:.4f} m); check the reach invert change "
+            "and the inflow state")
 
 
 def find_two_roots(Q, z0, y0, A0, P0, z1, section1, dx, n, g=G):
-    """Find BOTH roots of the energy equation.  Returns (y_supercritical, y_subcritical)."""
+    """Find BOTH roots of the energy equation.  Returns (y_supercritical, y_subcritical).
+
+    v1.0.1 (F-G2-1): shares the corrected root finder with
+    standard_step_general (true critical depth bracketing, root-pair-safe
+    scan, Newton polish).  None means the regime genuinely has no root --
+    the upstream depth is never silently substituted.
+    """
     if dx <= 0 or Q <= 0 or A0 <= 0:
         return None, None
     V0 = Q / A0
@@ -266,71 +395,13 @@ def find_two_roots(Q, z0, y0, A0, P0, z1, section1, dx, n, g=G):
         hf = 0.5 * (Sf1 + Sf0) * dx
         return H1 - H0 + hf
 
-    y_c = max(0.5, y0 * 1.5)
-    y_super = None
-    y_sub = None
-    # Find supercritical
-    for lo, hi in [(0.001, y_c), (0.0001, y_c * 0.5), (0.01, y_c * 0.8)]:
-        for _ in range(80):
-            try:
-                f_lo = f(lo)
-                f_hi = f(hi)
-            except Exception:
-                break
-            if abs(f_lo) < 1e-5:
-                y_super = lo
-                break
-            if abs(f_hi) < 1e-5:
-                y_super = hi
-                break
-            if (f_lo > 0) == (f_hi > 0):
-                break
-            mid = (lo + hi) / 2
-            f_mid = f(mid)
-            if abs(f_mid) < 1e-5:
-                y_super = mid
-                break
-            if (f_mid > 0) == (f_lo > 0):
-                lo = mid
-            else:
-                hi = mid
-            if (hi - lo) < 1e-7:
-                y_super = (hi + lo) / 2
-                break
-        if y_super is not None:
-            break
-    # Find subcritical
-    for lo, hi in [(y_c, max(y_c * 5, y0 * 10, 20.0)),
-                    (y_c, max(y_c * 10, y0 * 20, 50.0))]:
-        for _ in range(80):
-            try:
-                f_lo = f(lo)
-                f_hi = f(hi)
-            except Exception:
-                break
-            if abs(f_lo) < 1e-5:
-                y_sub = lo
-                break
-            if abs(f_hi) < 1e-5:
-                y_sub = hi
-                break
-            if (f_lo > 0) == (f_hi > 0):
-                break
-            mid = (lo + hi) / 2
-            f_mid = f(mid)
-            if abs(f_mid) < 1e-5:
-                y_sub = mid
-                break
-            if (f_mid > 0) == (f_lo > 0):
-                lo = mid
-            else:
-                hi = mid
-            if (hi - lo) < 1e-7:
-                y_sub = (hi + lo) / 2
-                break
-        if y_sub is not None:
-            break
+    y_c = _section_critical_depth(Q, section1, g=g)
+    y_floor = max(1e-9, 1e-6)
+    y_ceil = max(2.0 * y_c, 2.0 * y0, 20.0)
+    y_super = _find_branch_root(f, y_floor, y_c)
+    y_sub = _find_branch_root(f, y_c, y_ceil)
     return y_super, y_sub
+
 
 
 # =============================================================================
@@ -511,9 +582,23 @@ def compute_profile(
             Fr_prev = V_prev / math.sqrt(G * y_prev) if y_prev > 0 else 0
             supercritical = (Fr_prev >= 1.0)
             sect_curr = lambda yy, _s=s: section_geometry(_s, yy)
-            y = standard_step_general(Q, prev.invert, y_prev, A_prev, P_prev,
-                                      s.invert, sect_curr, dx, manning_n,
-                                      supercritical=supercritical)
+            try:
+                y = standard_step_general(Q, prev.invert, y_prev, A_prev,
+                                          P_prev, s.invert, sect_curr, dx,
+                                          manning_n,
+                                          supercritical=supercritical)
+            except ValueError as exc:
+                # v1.0.1 (F-G2-1): the reach has no energy-elevation root
+                # in either regime.  v1.0.0 silently froze the depth here
+                # and marched on, emitting corrupted rows; v1.0.1 reports
+                # the failure explicitly and stops the profile at the last
+                # solvable station.
+                res.success = False
+                res.error_message = (
+                    f"profile stopped at station index {i} "
+                    f"(sta {s.sta:.3f} m): {exc}")
+                res.rows = rows
+                return res
             # Hydraulic jump check
             A_after, _ = section_geometry(s, y)
             V_after = Q / A_after if A_after > 0 else 0

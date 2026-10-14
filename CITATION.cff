@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite it using the metadata below.
+title: >-
+  Spillway Workbench (SWB): cross-platform Python reimplementation of the
+  USBR Cavitation Programs and companion tool to Cavicuspill
+abstract: >-
+  A unified Python 3 / PySide6 workbench merging two hydraulic programs:
+  Cavicuspill (spillway design: flood routing, WES overflow profile,
+  cavitation screening; originally VB6, M.Sc. thesis, University of Sana'a,
+  2004) and EM-Py (a port of the U.S. Bureau of Reclamation "Cavitation
+  Programs" by H. T. Falvey, 1987/1990: water-surface profile, cavitation
+  index, damage index, aerator trajectory, equal-cavitation-number design).
+  The two share an MDI shell, a unified application state, bidirectional
+  geometry/damage bridges, a CLI, and a standalone Windows executable.
+authors:
+  - given-names: Abbas Ahmed Mohammed
+    family-names: Hebah
+    email: abbas74.hebah@gmail.com
+    orcid: "https://orcid.org/0009-0000-5689-2157"
+    affiliation: Iran University of Science and Technology
+version: 1.0.1
+date-released: "2026-10-01"
+license: MIT
+repository-code: "https://github.com/darwishdasty-oss/spillway-workbench"
+doi: "10.5281/zenodo.22839979"
+identifiers:
+  - type: url
+    value: "https://github.com/darwishdasty-oss/spillway-workbench"
+keywords:
+  - cavitation
+  - spillway
+  - hydraulic structures
+  - flood routing
+  - dam safety
+  - USBR
+  - aerators
+  - cavitation damage index
+related-identifiers:
+  - identifier: "10.5281/zenodo.22817892"
+    relation-type: IsSupplementTo
+    resource-type: software
+    description: Cavicuspill VB6 deposit (companion software archived on Zenodo)
+references:
+  - type: book
+    title: "Cavitation in Chutes and Spillways"
+    authors:
+      - family-names: Falvey
+        given-names: Henry T.
+    publisher: United States Bureau of Reclamation
+    year: 1990
+    notes: USBR Engineering Monograph No. 42
