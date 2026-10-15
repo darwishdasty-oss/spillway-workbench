@@ -17,7 +17,7 @@ authors:
     orcid: 0009-0000-5689-2157
     affiliation: 1
 affiliations:
-  - name: Iran University of Science and Technology
+  - name: Sana'a University
     index: 1
 date: 14 October 2026
 bibliography: paper.bib
