@@ -1,0 +1,1 @@
+type newstuff.doc|more

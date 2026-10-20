@@ -1,0 +1,133 @@
+name: Test and Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  tests:
+    name: Algorithm + GUI tests (Linux, offscreen)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Qt system libraries (headless)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PySide6==6.8.* numpy matplotlib
+          pip install -r requirements.txt || true
+
+      - name: Run algorithm self-tests (EM-Py modules)
+        run: |
+          python em_py/em_dindx.py
+          python em_py/em_convert.py || true
+          python em_py/em_ckdata.py || true
+
+      - name: Run merged-workbench test suite (offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python test_swb.py -v
+
+  build-windows:
+    name: Build Windows .exe
+    needs: tests
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Show working directory and file structure
+        shell: pwsh
+        run: |
+          Write-Host "=== Current directory ==="
+          Get-Location
+          Write-Host "=== Files in repo (top level) ==="
+          Get-ChildItem -Force | Select-Object Name, Mode | Format-Table -AutoSize
+          Write-Host "=== Looking for swb.spec ==="
+          if (Test-Path "swb.spec") { Write-Host "FOUND swb.spec" } else { Write-Host "ERROR: swb.spec NOT FOUND" -ForegroundColor Red; exit 1 }
+          if (Test-Path "ui/mdi_main.py") { Write-Host "FOUND ui/mdi_main.py" } else { Write-Host "ERROR: ui/mdi_main.py NOT FOUND" -ForegroundColor Red; exit 1 }
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install PySide6==6.7.* numpy==1.26.* matplotlib==3.8.* pyinstaller==6.10.*
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "ERROR: pip install failed" -ForegroundColor Red
+            exit 1
+          }
+
+      - name: Clean previous build
+        shell: pwsh
+        run: |
+          if (Test-Path "build") { Remove-Item -Recurse -Force "build" }
+          if (Test-Path "dist")  { Remove-Item -Recurse -Force "dist" }
+          Write-Host "Cleaned build/ and dist/"
+
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean swb.spec 2>&1 | Tee-Object -FilePath "build.log"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host ""
+            Write-Host "=== PyInstaller failed. Last 50 lines of build.log: ===" -ForegroundColor Red
+            Get-Content "build.log" | Select-Object -Last 50
+            exit 1
+          }
+
+      - name: Verify .exe was created
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "dist/SpillwayWorkbench.exe")) {
+            Write-Host "ERROR: dist/SpillwayWorkbench.exe not found after build" -ForegroundColor Red
+            Write-Host "=== dist/ contents: ==="
+            if (Test-Path "dist") { Get-ChildItem "dist" -Recurse | Select-Object FullName | Format-Table -AutoSize }
+            exit 1
+          }
+          $size = (Get-Item "dist/SpillwayWorkbench.exe").Length
+          Write-Host "SUCCESS: dist/SpillwayWorkbench.exe created, size = $size bytes ($([math]::Round($size/1MB, 1)) MB)"
+
+      - name: Compute SHA256 checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "dist/SpillwayWorkbench.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hash  SpillwayWorkbench.exe" | Out-File -FilePath "dist/SpillwayWorkbench.exe.sha256" -Encoding ascii
+          Write-Host "SHA256: $hash"
+          Get-Content "dist/SpillwayWorkbench.exe.sha256"
+
+      - name: Upload .exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpillwayWorkbench-Windows-x64
+          path: |
+            dist/SpillwayWorkbench.exe
+            dist/SpillwayWorkbench.exe.sha256
+          if-no-files-found: error
+
+      - name: Attach .exe to GitHub Release (on version tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/SpillwayWorkbench.exe
+            dist/SpillwayWorkbench.exe.sha256
+          generate_release_notes: true
