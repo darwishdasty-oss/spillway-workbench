@@ -468,6 +468,17 @@ def make_cross_section_dialog(section_type: str) -> CrossSectionDialog:
         "RectangularCorner":  "Rectangular corner",
         "Trangular":          "Triangular",
         "TrangularCorner":    "Triangular corner",
+        # Merged-shell menu keys (ui/mdi_main.py Cavitation Analysis
+        # cross-section submenu, snake_case)
+        "rectangular":         "Rectangular",
+        "trangular":           "Triangular",
+        "tropizodal":          "Trapezoidal",
+        "egg":                 "Egg-shaped",
+        "circular":            "Circular",
+        "horse_shoe":          "Horseshoe",
+        "modified_horse_shoe": "Modified horseshoe",
+        "rectangular_corner":  "Rectangular corner",
+        "trangular_corner":    "Triangular corner",
     }
     spec_name = keymap.get(section_type, section_type)
     for s in SECTION_SPECS:

@@ -15,7 +15,7 @@ Both are ports of USBR-era DOS programs to Python 3 / PySide6:
 The two share an MDI shell, an APP_STATE, a Reports menu, a CLI, and a
 PyInstaller-built single-file binary.
 """
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional

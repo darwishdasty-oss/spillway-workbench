@@ -32,11 +32,11 @@ The **bridge** (`bridge_hooks.py`) implements domain-specific translations in
 both directions: geometry exchange, damage-index cross-recomputation,
 chamfer-recommendation generation, and aerator placement.
 
-## What is included (v1.3.0)
+## What is included (v1.3.1)
 
 | Component | Status |
 |---|---|
-| `cavicuspill/` — design tools (routing, WES profile, cavitation No., air entrainment, damage) | Ported; **v1.3.0: full calculation core (Pulse routing, Standard Step, WES design, cavitation indices) with golden-reference validation** |
+| `cavicuspill/` — design tools (routing, WES profile, cavitation No., air entrainment, damage) | Ported; **v1.3.0: full calculation core (Pulse routing, Standard Step, WES design, cavitation indices) with golden-reference validation; v1.3.1: cross-section menus fixed (keyed factory dispatch)** |
 | `em_py/` — EM-DINDX, CONVT, CKDATA, CONSTP | Fully ported & tested |
 | `em_py/em_ws77.py` — water-surface profile | **Validated (v1.1)** — 27/27 stations inside the acceptance gate vs GLENOUT |
 | `em_py/em_traj.py` — aerator trajectory | **Validated (v1.2)** — Glen Canyon 33/33 printed points; Blue Mesa 65/65 points within 0.02 m |

@@ -139,6 +139,38 @@ class TestMdiShell(unittest.TestCase):
                 if s.windowTitle() == "E1. Reservoir Properties Grid"]
         self.assertGreaterEqual(len(subs), 1)
 
+    def _placeholder_error_texts(self):
+        """Collect 'Error opening form' labels from open placeholder windows."""
+        errs = []
+        for sub in self.win.mdi.subWindowList():
+            w = sub.widget()
+            if w is None:
+                continue
+            for lbl in w.findChildren(QtWidgets.QLabel):
+                if "Error opening form" in lbl.text():
+                    errs.append(lbl.text())
+        return errs
+
+    def test_open_cav_cross_sections(self):
+        # v1.3.1 regression: every cross-section menu key must open the real
+        # CrossSectionDialog (a keyed factory), not a placeholder carrying an
+        # "Error opening form" label.  The pre-fix bug passed the QMdiArea
+        # into the spec slot ('QMdiArea' object has no attribute 'name').
+        from cavicuspill.ui.forms.cross_section import CrossSectionDialog
+        keys = ["rectangular", "trangular", "tropizodal", "egg",
+                "circular", "horse_shoe", "modified_horse_shoe",
+                "rectangular_corner", "trangular_corner"]
+        for key in keys:
+            title = f"CrossSectionForm_{key}"
+            self.win.open_cav_form(key, title)
+            subs = [s for s in self.win.mdi.subWindowList()
+                    if s.windowTitle() == title]
+            self.assertEqual(len(subs), 1, f"key {key} did not open a window")
+            self.assertIsInstance(subs[0], CrossSectionDialog,
+                                  f"key {key} opened {type(subs[0]).__name__}")
+        self.assertEqual(self._placeholder_error_texts(), [],
+                         "placeholder error windows leaked into the MDI")
+
 
 if __name__ == "__main__":
     unittest.main()
