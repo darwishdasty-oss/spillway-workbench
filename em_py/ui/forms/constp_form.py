@@ -8,10 +8,22 @@ from __future__ import annotations
 import os
 import math
 from PySide6 import QtCore, QtWidgets
-from ui.charts.matplotlib_widget import MplCanvas
-from ui import mdi_main
-from em_data import read_geometry_file
-from em_constp import compute_constp
+try:
+    from em_py.ui.charts.matplotlib_widget import MplCanvas   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui.charts.matplotlib_widget import MplCanvas
+try:
+    from em_py.ui import mdi_main   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui import mdi_main
+try:
+    from em_py.em_data import read_geometry_file   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_data import read_geometry_file
+try:
+    from em_py.em_constp import compute_constp   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_constp import compute_constp
 
 
 class CONSTPForm(QtWidgets.QWidget):

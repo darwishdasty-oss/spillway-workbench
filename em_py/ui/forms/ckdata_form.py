@@ -4,9 +4,18 @@ ui/forms/ckdata_form.py - CKDATA (Check Data) form.
 from __future__ import annotations
 import os
 from PySide6 import QtCore, QtGui, QtWidgets
-from ui import mdi_main
-from em_ckdata import check_data, format_report
-from em_data import read_geometry_file
+try:
+    from em_py.ui import mdi_main   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui import mdi_main
+try:
+    from em_py.em_ckdata import check_data, format_report   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_ckdata import check_data, format_report
+try:
+    from em_py.em_data import read_geometry_file   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_data import read_geometry_file
 
 
 class CKDATAForm(QtWidgets.QWidget):

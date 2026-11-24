@@ -7,10 +7,22 @@ Wired to em_ws77.compute_profile() for the full standard-step + boundary-layer
 from __future__ import annotations
 import os
 from PySide6 import QtCore, QtGui, QtWidgets
-from ui.charts.matplotlib_widget import MplCanvas
-from ui import mdi_main
-from em_data import read_geometry_file, read_ws_output
-from em_ws77 import compute_profile
+try:
+    from em_py.ui.charts.matplotlib_widget import MplCanvas   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui.charts.matplotlib_widget import MplCanvas
+try:
+    from em_py.ui import mdi_main   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui import mdi_main
+try:
+    from em_py.em_data import read_geometry_file, read_ws_output   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_data import read_geometry_file, read_ws_output
+try:
+    from em_py.em_ws77 import compute_profile   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_ws77 import compute_profile
 
 
 class WS77Form(QtWidgets.QWidget):
@@ -36,9 +48,9 @@ class WS77Form(QtWidgets.QWidget):
         # EGL calibration (optional)
         gb_cal = QtWidgets.QGroupBox("Calibration (optional)")
         gbl = QtWidgets.QHBoxLayout(gb_cal)
-        gbl.addWidget(QtWidgets.QLabel("EGL at first station (optional calibration, m):"))
+        gbl.addWidget(QtWidgets.QLabel("EGL at start of boundary layer (m):"))
         self.egl_cal = QtWidgets.QLineEdit()
-        self.egl_cal.setPlaceholderText("(auto from initial depth if blank)")
+        self.egl_cal.setPlaceholderText("(auto from geometry if blank)")
         gbl.addWidget(self.egl_cal)
         gbl.addStretch(1)
         layout.addWidget(gb_cal)

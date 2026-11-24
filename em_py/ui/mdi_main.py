@@ -166,10 +166,19 @@ class MdiMainWindow(QtWidgets.QMainWindow):
         help_menu.addAction("&Documentation", self.show_docs)
         # === v0.4 Report export methods ===
     def generate_pdf_report(self):
-        from em_report import make_pdf_report
+        try:
+            from em_py.em_report import make_pdf_report   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_report import make_pdf_report
         from PySide6 import QtWidgets
-        from em_data import read_geometry_file
-        from em_ws77 import compute_profile
+        try:
+            from em_py.em_data import read_geometry_file   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_data import read_geometry_file
+        try:
+            from em_py.em_ws77 import compute_profile   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_ws77 import compute_profile
         if not APP_STATE.geometry:
             QtWidgets.QMessageBox.warning(self, "No data",
                 "Please load a sample first (Sample Data menu).")
@@ -189,7 +198,10 @@ class MdiMainWindow(QtWidgets.QMainWindow):
     def export_json(self):
         from PySide6 import QtWidgets
         import json
-        from em_ws77 import compute_profile
+        try:
+            from em_py.em_ws77 import compute_profile   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_ws77 import compute_profile
         if not APP_STATE.geometry:
             QtWidgets.QMessageBox.warning(self, "No data",
                 "Please load a sample first.")
@@ -207,7 +219,10 @@ class MdiMainWindow(QtWidgets.QMainWindow):
     def export_csv(self):
         from PySide6 import QtWidgets
         import csv
-        from em_ws77 import compute_profile
+        try:
+            from em_py.em_ws77 import compute_profile   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_ws77 import compute_profile
         if not APP_STATE.geometry:
             QtWidgets.QMessageBox.warning(self, "No data",
                 "Please load a sample first.")
@@ -357,7 +372,10 @@ Run `python em_cli.py --help` for full options.
             QtWidgets.QMessageBox.critical(self, "Load failed", str(e))
     
     def load_sample(self, name: str):
-        from em_data import load_sample_data
+        try:
+            from em_py.em_data import load_sample_data   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_data import load_sample_data
         try:
             data = load_sample_data(name)
         except Exception as e:

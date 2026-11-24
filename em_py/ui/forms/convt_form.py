@@ -4,10 +4,18 @@ ui/forms/convt_form.py - CONVT (Unit Conversion) form.
 from __future__ import annotations
 import os, sys
 from PySide6 import QtCore, QtGui, QtWidgets
-from ui import mdi_main
-from em_convert import (ft_to_m, m_to_ft, cfs_to_cms, cms_to_cfs,
-                        in_to_mm, mm_to_in, f_to_c, c_to_f,
-                        psi_to_pa, pa_to_psi, lbf_to_n, n_to_lbf)
+try:
+    from em_py.ui import mdi_main   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui import mdi_main
+try:
+    from em_py.em_convert import (ft_to_m, m_to_ft, cfs_to_cms, cms_to_cfs,   # noqa: packaged / merged shell
+    in_to_mm, mm_to_in, f_to_c, c_to_f,
+    psi_to_pa, pa_to_psi, lbf_to_n, n_to_lbf)
+except ImportError:  # standalone run (em_py as project root)
+    from em_convert import (ft_to_m, m_to_ft, cfs_to_cms, cms_to_cfs,
+    in_to_mm, mm_to_in, f_to_c, c_to_f,
+    psi_to_pa, pa_to_psi, lbf_to_n, n_to_lbf)
 
 
 class CONVTForm(QtWidgets.QWidget):
@@ -83,8 +91,14 @@ class CONVTForm(QtWidgets.QWidget):
                 self.file_out.setText(f"{base}{new_units}{ext or '.INP'}")
     
     def _convert_file(self):
-        from em_data import read_geometry_file
-        from em_convert import convert_geometry_file
+        try:
+            from em_py.em_data import read_geometry_file   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_data import read_geometry_file
+        try:
+            from em_py.em_convert import convert_geometry_file   # noqa: packaged / merged shell
+        except ImportError:  # standalone run (em_py as project root)
+            from em_convert import convert_geometry_file
         in_path = self.file_in.text().strip()
         out_path = self.file_out.text().strip()
         if not in_path or not out_path:

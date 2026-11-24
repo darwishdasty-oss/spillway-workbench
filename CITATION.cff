@@ -14,16 +14,16 @@ abstract: >-
   The two share an MDI shell, a unified application state, bidirectional
   geometry/damage bridges, a CLI, and a standalone Windows executable.
 authors:
-  - given-names: Abbas Ahmed Mohammed
+  - given-names: Abbas A.
     family-names: Hebah
     email: abbas74.hebah@gmail.com
     orcid: "https://orcid.org/0009-0000-5689-2157"
-    affiliation: Department of Civil Engineering, University of Sana'a, and the Water and Environment Center, Sana'a, Yemen
-version: 1.2.1
+    affiliation: Iran University of Science and Technology
+version: 1.3.0
 date-released: "2026-11-24"
 license: MIT
 repository-code: "https://github.com/darwishdasty-oss/spillway-workbench"
-doi: "10.5281/zenodo.22839979"
+doi: "10.5281/zenodo.XXXXXXX"
 identifiers:
   - type: url
     value: "https://github.com/darwishdasty-oss/spillway-workbench"
@@ -36,13 +36,17 @@ keywords:
   - USBR
   - aerators
   - cavitation damage index
+related-identifiers:
+  - identifier: "10.5281/zenodo.22817892"
+    relation-type: isComplementedBy
+    resource-type: software
+    description: Cavicuspill VB6 deposit (companion software archived on Zenodo)
 references:
   - type: book
     title: "Cavitation in Chutes and Spillways"
     authors:
       - family-names: Falvey
         given-names: Henry T.
-    publisher:
-      name: United States Bureau of Reclamation
+    publisher: United States Bureau of Reclamation
     year: 1990
     notes: USBR Engineering Monograph No. 42

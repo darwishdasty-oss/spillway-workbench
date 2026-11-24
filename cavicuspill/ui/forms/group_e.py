@@ -81,7 +81,10 @@ class ReservoirPropertiesGridForm(QtWidgets.QMdiSubWindow):
 
     def _load_from_state(self):
         res = cav.APP_STATE.reservoir_data if hasattr(cav, 'APP_STATE') else None
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         res = APP_STATE.reservoir_data
         if res is None or len(res.h) == 0:
             self.summary.setText("No reservoir data loaded. Fill in Reservoir Properties form first.")
@@ -97,7 +100,10 @@ class ReservoirPropertiesGridForm(QtWidgets.QMdiSubWindow):
         self.summary.setText(f"{len(h)} rows (input).")
 
     def _on_refresh(self):
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         res = APP_STATE.reservoir_data
         if res is None or len(res.h) < 2:
             self.summary.setText("Need >= 2 input points.")
@@ -171,7 +177,10 @@ class InFlowDataGridForm(QtWidgets.QMdiSubWindow):
         self.setWidget(w)
 
     def _load_from_state(self):
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         inflow = APP_STATE.inflow
         if inflow is None or len(inflow.t_h) == 0:
             self.summary.setText("No inflow data loaded.")
@@ -255,7 +264,10 @@ class OutFlowDataGridForm(QtWidgets.QMdiSubWindow):
         self.setWidget(w)
 
     def _load_from_state(self):
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         surface = APP_STATE.surface_profile
         if surface is None or 'routing_table' not in surface:
             self.summary.setText("No outflow routing data.  Run the routing calculation first.")
@@ -349,7 +361,10 @@ class SpillWayDataGridForm(QtWidgets.QMdiSubWindow):
         self.setWidget(w)
 
     def _load_from_state(self):
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         res = APP_STATE.reservoir_data
         sw = APP_STATE.spillway_cfg
         if res is None or sw is None or len(res.h) == 0:
@@ -375,7 +390,10 @@ class SpillWayDataGridForm(QtWidgets.QMdiSubWindow):
     def _on_L_changed(self, row):
         if row < 0 or row >= len(self._L_list):
             return
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         res = APP_STATE.reservoir_data
         sw = APP_STATE.spillway_cfg
         if res is None or sw is None:
@@ -480,7 +498,10 @@ class ProfileDataForm(QtWidgets.QMdiSubWindow):
         self.setWidget(w)
 
     def _on_ok(self):
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         try:
             data = {
                 "slope_upstream": float(self.edit_slope_up.text()),
@@ -498,7 +519,10 @@ class ProfileDataForm(QtWidgets.QMdiSubWindow):
 
     def showEvent(self, event):
         super().showEvent(event)
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         d = getattr(APP_STATE, 'profile_data', None) or {}
         self.edit_slope_up.setText(str(d.get("slope_upstream", 0.0)))
         self.edit_L.setText(str(d.get("L_crest_to_toe", 0.0)))
@@ -558,7 +582,10 @@ class OutflowDiagramForm(QtWidgets.QMdiSubWindow):
 
     def _redraw(self):
         self.fig.clear()
-        from ui.mdi_main import APP_STATE
+        try:
+            from cavicuspill.ui.mdi_main import APP_STATE  # merged shell / package
+        except ImportError:  # standalone run
+            from ui.mdi_main import APP_STATE
         ax = self.fig.add_subplot(111)
         plotted = False
         if APP_STATE.inflow is not None and len(APP_STATE.inflow.t_h) > 0:

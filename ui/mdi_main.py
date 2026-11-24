@@ -32,7 +32,7 @@ from app_state import APP_STATE, SpillwayWorkbenchState
 class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Spillway Workbench v1.0 (Cavicuspill + EM-Py)")
+        self.setWindowTitle("Spillway Workbench v1.3.0 (Cavicuspill + EM-Py)")
         self.resize(1500, 950)
 
         # MDI area
@@ -53,7 +53,7 @@ class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
 
         # Status bar
         self.statusBar().showMessage(
-            f"Ready -- Spillway Workbench v1.0 -- {datetime.date.today().isoformat()}"
+            f"Ready -- Spillway Workbench v1.3.0 -- {datetime.date.today().isoformat()}"
         )
 
     # ------------------------------------------------------------------ File
@@ -328,14 +328,14 @@ class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
                 dindx_form, convt_form, ckdata_form, about_form,
             )
             form_map = {
-                "ws77": (ws77_form, "Ws77Form"),
-                "plot77": (plot77_form, "Plot77Form"),
-                "traj": (traj_form, "TrajForm"),
-                "ecavno": (ecavno_form, "EcavnoForm"),
-                "constp": (constp_form, "ConstpForm"),
-                "dindx": (dindx_form, "DindxForm"),
-                "convt": (convt_form, "ConvtForm"),
-                "ckdata": (ckdata_form, "CkdataForm"),
+                "ws77": (ws77_form, "WS77Form"),
+                "plot77": (plot77_form, "PLOT77Form"),
+                "traj": (traj_form, "TRAJForm"),
+                "ecavno": (ecavno_form, "ECAVNOForm"),
+                "constp": (constp_form, "CONSTPForm"),
+                "dindx": (dindx_form, "DINDXForm"),
+                "convt": (convt_form, "CONVTForm"),
+                "ckdata": (ckdata_form, "CKDATAForm"),
             }
             if key not in form_map:
                 self._open_placeholder(title, f"EM-Py form '{key}' not in map.")
@@ -343,15 +343,26 @@ class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
             mod, cls_name = form_map[key]
             cls = getattr(mod, cls_name, None)
             if cls is None:
-                for name in dir(mod):
-                    obj = getattr(mod, name)
-                    if isinstance(obj, type) and issubclass(obj, QtWidgets.QMdiSubWindow):
-                        cls = obj
-                        break
+                # The EM-Py forms are plain QWidget subclasses (QMdiArea
+                # wraps them via addSubWindow).  Prefer a class whose name
+                # ends in 'Form' defined in the module itself.
+                candidates = [
+                    obj for name, obj in vars(mod).items()
+                    if isinstance(obj, type)
+                    and issubclass(obj, QtWidgets.QWidget)
+                    and obj.__module__ == mod.__name__
+                ]
+                form_cands = [c for c in candidates if c.__name__.endswith("Form")]
+                cls = form_cands[0] if form_cands else (
+                    candidates[0] if candidates else None)
             if cls is None:
-                self._open_placeholder(title, f"No QMdiSubWindow class in {mod.__name__}")
+                self._open_placeholder(title, f"No form class in {mod.__name__}")
                 return
-            sub = cls(self.mdi)
+            try:
+                sub = cls(self.mdi)
+            except TypeError:
+                # most EM-Py forms define __init__(self) without a parent
+                sub = cls()
             sub.setAttribute(QtCore.Qt.WA_DeleteOnClose)
             sub.setWindowTitle(title)
             self.mdi.addSubWindow(sub)
@@ -367,6 +378,17 @@ class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
             APP_STATE.em_ws_output = data.get('ws_output')
         else:
             APP_STATE.em_geometry = data
+        # Mirror the geometry into the em-side APP_STATE that the EM-Py
+        # forms read, so "Load sample" then "open WS77" works end-to-end.
+        try:
+            import em_py.em_data as _em_data
+            from em_py.ui import mdi_main as _em_mdi
+            _em_mdi.APP_STATE.geometry = APP_STATE.em_geometry
+            _em_mdi.APP_STATE.last_data_dir = os.path.join(
+                os.path.dirname(os.path.abspath(_em_data.__file__)),
+                "sample_data", "DATA")
+        except Exception:
+            pass
         if APP_STATE.em_geometry is not None:
             self.statusBar().showMessage(
                 f"Sample loaded: {name} -- "
@@ -676,12 +698,13 @@ Run `python -m em_py.em_cli --help` for full options.
         m.addAction("&Version", self.on_version)
 
     def on_about(self):
-        text = """<h2>Spillway Workbench v1.0</h2>
+        text = """<h2>Spillway Workbench v1.3.0</h2>
 <p>A unified Python 3 / PySide6 workbench combining:</p>
 <ul>
-<li><b>Cavicuspill v1.4</b> -- spillway design (flood routing, WES design,
+<li><b>Cavicuspill engine 1.3.0</b> -- spillway design (flood routing, WES design,
 cavitation damage, air entrainment). Ported from Abbas A. Hebah's VB6
-original (2004-2006).</li>
+original (2004-2006); v1.3.0 completes the full calculation core with
+golden-reference validation against the published Example 1 benchmark.</li>
 <li><b>EM-Py v0.4</b> -- cavitation analysis (water surface profile,
 boundary layer, cavitation index, damage rates). Ported from USBR Henry T.
 Falvey's "Cavitation Programs" (1987/1990).</li>
@@ -698,7 +721,9 @@ Monograph No. 42, USBR Design of Small Dams 1987).</p>
 
     def on_version(self):
         QtWidgets.QMessageBox.information(
-            self, "Version", "Spillway Workbench v1.0\nCavicuspill v1.4 + EM-Py v0.4")
+            self, "Version",
+            "Spillway Workbench v1.3.0\n"
+            "Cavicuspill engine 1.3.0 (VB6 parity, golden-validated) + EM-Py v0.4")
 
 
 # =============================================================================

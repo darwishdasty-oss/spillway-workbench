@@ -39,7 +39,10 @@ import cavicuspill as cav  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Use the same module-identity trick: import by full module path so that
 # all forms share a single APP_STATE object across the test/demo.
-import mdi_main as _mdi_main  # noqa: E402
+try:
+    from cavicuspill.ui import mdi_main as _mdi_main  # noqa: E402  (merged shell / package)
+except ImportError:  # standalone run (sys.path hack above)
+    import mdi_main as _mdi_main  # noqa: E402
 APP_STATE = _mdi_main.APP_STATE
 
 

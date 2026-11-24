@@ -6,10 +6,22 @@ Wired to em_ecavno.design_spillway() for the iterative equal-sigma design.
 from __future__ import annotations
 import os
 from PySide6 import QtCore, QtWidgets
-from ui.charts.matplotlib_widget import MplCanvas
-from ui import mdi_main
-from em_data import read_ecn_input
-from em_ecavno import design_spillway
+try:
+    from em_py.ui.charts.matplotlib_widget import MplCanvas   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui.charts.matplotlib_widget import MplCanvas
+try:
+    from em_py.ui import mdi_main   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui import mdi_main
+try:
+    from em_py.em_data import read_ecn_input   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_data import read_ecn_input
+try:
+    from em_py.em_ecavno import design_spillway   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from em_ecavno import design_spillway
 
 
 class ECAVNOForm(QtWidgets.QWidget):

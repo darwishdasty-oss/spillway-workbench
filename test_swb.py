@@ -125,13 +125,24 @@ class TestMdiShell(unittest.TestCase):
         self.assertTrue(hasattr(self.win, "bridge_em_to_cav"))
 
     def test_open_em_group_e(self):
+        # v1.3.0: assert that THIS form's sub-window exists (the old
+        # ">= 3 accumulated windows" assertion passed only by accident,
+        # because the pre-fix duplicate-module bug opened E1 twice).
         self.win._open_em_group_e("e1", "EM1. Station Grid")
-        self.assertGreaterEqual(len(self.win.mdi.subWindowList()), 3)
+        subs = [s for s in self.win.mdi.subWindowList()
+                if s.windowTitle() == "EM1. Station Grid"]
+        self.assertGreaterEqual(len(subs), 1)
 
     def test_open_cav_group_e(self):
         self.win._open_cav_group_e("e1", "E1. Reservoir Properties Grid")
-        # This may fail if previous form raised an exception; just check at least 3
-        self.assertGreaterEqual(len(self.win.mdi.subWindowList()), 3)
+        subs = [s for s in self.win.mdi.subWindowList()
+                if s.windowTitle() == "E1. Reservoir Properties Grid"]
+        self.assertGreaterEqual(len(subs), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
 
 
 class TestBridgeHooks(unittest.TestCase):
@@ -176,7 +187,3 @@ class TestBridgeHooks(unittest.TestCase):
         for r in recs:
             self.assertIn(r.recommended_ratio, ["1:4", "1:2", "1:1", "1:1 (insufficient)"])
             self.assertLessEqual(r.recommended_damage, r.damage_no_chamfer)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -31,7 +31,7 @@ is equivalent to:
     from app_state import APP_STATE
     from ui.mdi_main import SpillwayWorkbenchMainWindow
 """
-__version__ = "1.0.0"
+__version__ = "1.3.0"
 
 __author__ = "Abbas A. Hebah"
 __license__ = "MIT"

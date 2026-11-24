@@ -2,12 +2,12 @@
   "title": "Spillway Workbench (SWB): cross-platform Python reimplementation of the USBR Cavitation Programs and companion tool to Cavicuspill",
   "upload_type": "software",
   "publication_type": "software",
-  "description": "<p>A unified Python 3 / PySide6 workbench merging two hydraulic programs: <strong>Cavicuspill</strong> (spillway design: flood routing, WES overflow profile, cavitation screening; originally VB6, M.Sc. thesis, University of Sana'a, 2004) and <strong>EM-Py</strong> (a port of the U.S. Bureau of Reclamation &ldquo;Cavitation Programs&rdquo; by H. T. Falvey, 1987/1990: water-surface profile, cavitation index, damage index, aerator trajectory, equal-cavitation-number design). The two share an MDI shell, a unified application state, bidirectional geometry/damage bridges, a CLI, and a standalone Windows executable. Bundled USBR sample data: Glen Canyon, Blue Mesa, Hoover.</p><p><strong>Honest status:</strong> the parsers, unit converter, data validator, damage-index program (Falvey 1990 Table 7.1) and controlled-pressure distributions are faithful, tested ports. The WS77 water-surface-profile engine (v1.1) is validated against the USBR reference output GLENOUT (27/27 stations inside the agreed acceptance gate of velocity &plusmn;5% and depth &plusmn;5% or 0.05 m; worst velocity deviation 1.06%), and the TRAJ aerator-trajectory engine (v1.2) is validated against the original April-1990 binaries (Glen Canyon: all 33 printed points vs EM-42 p. 127; Blue Mesa: all 65 interpolated points within 0.02 m &mdash; the first numerical record of that table). ECAVNO remains a framework stub.</p>",
+  "description": "<p>A unified Python 3 / PySide6 workbench merging two hydraulic programs: <strong>Cavicuspill</strong> (spillway design: flood routing, WES overflow profile, cavitation screening; originally VB6, M.Sc. thesis, University of Sana'a, 2004) and <strong>EM-Py</strong> (a port of the U.S. Bureau of Reclamation &ldquo;Cavitation Programs&rdquo; by H. T. Falvey, 1987/1990: water-surface profile, cavitation index, damage index, aerator trajectory, equal-cavitation-number design). The two share an MDI shell, a unified application state, bidirectional geometry/damage bridges, a CLI, and a standalone Windows executable. Bundled USBR sample data: Glen Canyon, Blue Mesa, Hoover.</p><p><strong>Honest status:</strong> the parsers, unit converter, data validator, damage-index program (Falvey 1990 Table 7.1) and controlled-pressure distributions are faithful, tested ports; the WS77/TRAJ/ECAVNO modules are algorithm frameworks pending the v1.1 validation release.</p>",
   "creators": [
     {
       "name": "Hebah, Abbas A.",
-      "affiliation": "Department of Civil Engineering, University of Sana'a, and the Water and Environment Center, Sana'a, Yemen",
-      "orcid": "0009-0000-5689-2157"
+      "affiliation": "Iran University of Science and Technology",
+      "orcid": "https://orcid.org/0009-0000-5689-2157"
     }
   ],
   "license": "MIT",
@@ -24,7 +24,7 @@
   "related_identifiers": [
     {
       "identifier": "10.5281/zenodo.22817892",
-      "relation": "is-supplement-to",
+      "relation": "isComplementedBy",
       "resource_type": "software",
       "scheme": "doi"
     }
@@ -34,5 +34,5 @@
   ],
   "language": "eng",
   "access_right": "open",
-  "version": "1.2.1"
+  "version": "1.3.0"
 }

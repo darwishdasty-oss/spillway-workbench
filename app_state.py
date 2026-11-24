@@ -68,9 +68,11 @@ class SpillwayWorkbenchState:
     last_export_path: str = ""
 
     def get_cav_state(self):
-        """Return the cavicuspill AppState, creating it if needed."""
+        """Return the cavicuspill AppState singleton (the one the forms use)."""
         if self.cav is None:
-            self.cav = _cav().AppState()
+            # Use the module-level singleton, NOT a fresh AppState():
+            # the Cavicuspill forms read/write this exact instance.
+            self.cav = _cav().APP_STATE
         return self.cav
 
     def bridge_from_cav_to_em(self) -> bool:

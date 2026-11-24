@@ -3,10 +3,18 @@ ui/forms/dindx_form.py - DINDX (Damage Index) form.
 """
 from __future__ import annotations
 from PySide6 import QtCore, QtWidgets
-from ui.charts.matplotlib_widget import MplCanvas
-from em_dindx import (SigmaQData, HydrographPoint, fit_sigma_q,
-                      sigma_at_q, total_damage,
-                      DEFAULT_DAMAGE_COEFFS, DEFAULT_90_DEG_COEFFS)
+try:
+    from em_py.ui.charts.matplotlib_widget import MplCanvas   # noqa: packaged / merged shell
+except ImportError:  # standalone run (em_py as project root)
+    from ui.charts.matplotlib_widget import MplCanvas
+try:
+    from em_py.em_dindx import (SigmaQData, HydrographPoint, fit_sigma_q,   # noqa: packaged / merged shell
+    sigma_at_q, total_damage,
+    DEFAULT_DAMAGE_COEFFS, DEFAULT_90_DEG_COEFFS)
+except ImportError:  # standalone run (em_py as project root)
+    from em_dindx import (SigmaQData, HydrographPoint, fit_sigma_q,
+    sigma_at_q, total_damage,
+    DEFAULT_DAMAGE_COEFFS, DEFAULT_90_DEG_COEFFS)
 
 
 class DINDXForm(QtWidgets.QWidget):
