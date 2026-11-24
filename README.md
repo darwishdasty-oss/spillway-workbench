@@ -3,7 +3,7 @@
 [![CI](https://github.com/darwishdasty-oss/spillway-workbench/actions/workflows/build.yml/badge.svg)](https://github.com/darwishdasty-oss/spillway-workbench/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.XXXXXXX-blue.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22839979-blue.svg)](https://doi.org/10.5281/zenodo.22839979)
 
 **Spillway Workbench (SWB)** is a unified, cross-platform engineering workbench
 that merges two hydraulic programs into one Python 3 / PySide6 application:
@@ -32,7 +32,7 @@ The **bridge** (`bridge_hooks.py`) implements domain-specific translations in
 both directions: geometry exchange, damage-index cross-recomputation,
 chamfer-recommendation generation, and aerator placement.
 
-## What is included (v1.2.0)
+## What is included (v1.2.1)
 
 | Component | Status |
 |---|---|
@@ -129,7 +129,7 @@ If you use SWB in research, please cite it (see [CITATION.cff](CITATION.cff)):
 
 > Hebah, A. A. (2026). *Spillway Workbench (SWB): cross-platform Python
 > reimplementation of the USBR Cavitation Programs and companion tool to
-> Cavicuspill* (Version 1.2.0). Zenodo. https://doi.org/10.5281/zenodo.22839979
+> Cavicuspill* (Version 1.2.1). Zenodo. https://doi.org/10.5281/zenodo.22839979
 > (concept DOI — always resolves to the latest release)
 
 The companion deposit for the original VB6 program **Cavicuspill** is archived
