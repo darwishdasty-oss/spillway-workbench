@@ -47,6 +47,7 @@ jobs:
           python test_ws77_v11.py
           python test_traj_v12.py
           python test_cav_engine_v130.py
+          python test_cross_sections_v132.py
 
   build-windows:
     permissions:

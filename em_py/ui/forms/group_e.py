@@ -41,9 +41,9 @@ except ImportError:  # standalone run (em_py as project root)
 # =============================================================================
 
 class StationGridForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E1. Station Grid - Station Data Table")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM1. Station Grid")
         self._build()
 
     def _build(self):
@@ -138,9 +138,9 @@ class StationGridForm(QtWidgets.QWidget):
 # =============================================================================
 
 class HydrographForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E2. Hydrograph - Inflow Discharge vs Time")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM2. Hydrograph Viewer")
         self._build()
 
     def _build(self):
@@ -226,9 +226,9 @@ class HydrographForm(QtWidgets.QWidget):
 # =============================================================================
 
 class BoundaryLayerForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E3. Boundary Layer Profile - Velocity Profile Viewer")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM3. Boundary Layer Profile")
         self._build()
 
     def _build(self):
@@ -296,9 +296,9 @@ class BoundaryLayerForm(QtWidgets.QWidget):
 # =============================================================================
 
 class DataCompareForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E4. Data Compare - Side-by-side File Comparison")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM4. Data Compare")
         self._build()
 
     def _build(self):
@@ -370,9 +370,9 @@ class DataCompareForm(QtWidgets.QWidget):
 # =============================================================================
 
 class ExporterForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E5. Exporter - Data Export to CSV / JSON")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM5. Exporter")
         self._build()
 
     def _build(self):
@@ -472,9 +472,9 @@ class ExporterForm(QtWidgets.QWidget):
 # =============================================================================
 
 class ReportForm(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("E6. Report - Generate a Text Report of a WS77 Run")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("EM6. Report Generator")
         self._build()
 
     def _build(self):
@@ -562,3 +562,18 @@ class ReportForm(QtWidgets.QWidget):
         if not path: return
         with open(path, 'w') as f:
             f.write(self.report.toPlainText())
+
+
+# =============================================================================
+# Module-level registry (keyed factory, mirrors the Cavicuspill Group E
+# registry; keys match the merged-shell "EM-Py utilities" submenu)
+# =============================================================================
+
+GROUP_E_FORMS = {
+    "e1": ("EM1. Station Grid", StationGridForm),
+    "e2": ("EM2. Hydrograph Viewer", HydrographForm),
+    "e3": ("EM3. Boundary Layer Profile", BoundaryLayerForm),
+    "e4": ("EM4. Data Compare", DataCompareForm),
+    "e5": ("EM5. Exporter", ExporterForm),
+    "e6": ("EM6. Report Generator", ReportForm),
+}

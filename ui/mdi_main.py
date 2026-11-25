@@ -32,7 +32,7 @@ from app_state import APP_STATE, SpillwayWorkbenchState
 class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Spillway Workbench v1.3.1 (Cavicuspill + EM-Py)")
+        self.setWindowTitle("Spillway Workbench v1.3.2 (Cavicuspill + EM-Py)")
         self.resize(1500, 950)
 
         # MDI area
@@ -53,7 +53,7 @@ class SpillwayWorkbenchMainWindow(QtWidgets.QMainWindow):
 
         # Status bar
         self.statusBar().showMessage(
-            f"Ready -- Spillway Workbench v1.3.1 -- {datetime.date.today().isoformat()}"
+            f"Ready -- Spillway Workbench v1.3.2 -- {datetime.date.today().isoformat()}"
         )
 
     # ------------------------------------------------------------------ File
@@ -709,10 +709,10 @@ Run `python -m em_py.em_cli --help` for full options.
         m.addAction("&Version", self.on_version)
 
     def on_about(self):
-        text = """<h2>Spillway Workbench v1.3.1</h2>
+        text = """<h2>Spillway Workbench v1.3.2</h2>
 <p>A unified Python 3 / PySide6 workbench combining:</p>
 <ul>
-<li><b>Cavicuspill engine 1.3.1</b> -- spillway design (flood routing, WES design,
+<li><b>Cavicuspill engine 1.3.2</b> -- spillway design (flood routing, WES design,
 cavitation damage, air entrainment). Ported from Abbas A. Hebah's VB6
 original (2004-2006); v1.3.0 completes the full calculation core with
 golden-reference validation against the published Example 1 benchmark.</li>
@@ -733,8 +733,8 @@ Monograph No. 42, USBR Design of Small Dams 1987).</p>
     def on_version(self):
         QtWidgets.QMessageBox.information(
             self, "Version",
-            "Spillway Workbench v1.3.1\n"
-            "Cavicuspill engine 1.3.1 (VB6 parity, golden-validated) + EM-Py v0.4")
+            "Spillway Workbench v1.3.2\n"
+            "Cavicuspill engine 1.3.2 (VB6 parity, golden-validated) + EM-Py v0.4")
 
 
 # =============================================================================
