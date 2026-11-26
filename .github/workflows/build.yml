@@ -10,6 +10,8 @@ jobs:
   tests:
     name: Algorithm + GUI tests (Linux, offscreen)
     runs-on: ubuntu-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -37,8 +39,6 @@ jobs:
           python em_py/em_ckdata.py || true
 
       - name: Run merged-workbench test suite (offscreen)
-        env:
-          QT_QPA_PLATFORM: offscreen
         run: |
           python test_swb.py -v
 

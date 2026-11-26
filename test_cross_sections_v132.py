@@ -31,6 +31,11 @@ import os
 import sys
 import unittest
 
+# Headless-safe GUI: select the offscreen Qt platform BEFORE any Qt import
+# or QApplication (mirrors test_swb.py). Without this, CI runners fall back
+# to xcb and abort (no DISPLAY, no libxcb-cursor0 on ubuntu-latest).
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from cavicuspill.ui.forms.cross_section import (
@@ -329,7 +334,7 @@ class TestGroupERegistries(unittest.TestCase):
 
 
 class TestGuiSmokeOffscreen(unittest.TestCase):
-    """All dialogs/forms instantiate offscreen (CI: QT_QPA=offscreen)."""
+    """All dialogs/forms instantiate offscreen (self-guards QT_QPA)."""
 
     @classmethod
     def setUpClass(cls):
